@@ -1,94 +1,85 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.0.0",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
-    },
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "title": "Cutlist",
+    "description": "Cutlist public API",
+    "contact": {
+      "name": "Cutr",
+      "email": "bogdan.salau@cutr.ai",
+      "url": "https://cutr.com/"
+    }
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
-    }
-  ],
-  "security": [
+      "url": "https://api.gcp-staging.cutr.com/public",
+      "description": "Staging server"
+    },
     {
-      "bearerAuth": []
+      "url": "https://api.cutr.com/public",
+      "description": "Production server"
     }
   ],
   "paths": {
-    "/plants": {
+    "/cutlists": {
       "get": {
-        "description": "Returns all plants from the system that the user has access to",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
+        "description": "Get cutlists",
+        "operationId": "getCutlists",
         "responses": {
           "200": {
-            "description": "Plant response",
+            "description": "Cutlists, each having an authorized link to a view-only page",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "regex",
+                            "pattern": "^[0-9A-Z]{26}$",
+                            "description": "Unique identifier",
+                            "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "requestType": {
+                            "enum": [
+                              "place_order",
+                              "request_quote"
+                            ]
+                          },
+                          "createdAt": {
+                            "type": "number"
+                          },
+                          "updatedAt": {
+                            "type": "number"
+                          },
+                          "submittedAt": {
+                            "type": "number"
+                          },
+                          "cancelledAt": {
+                            "type": "number"
+                          },
+                          "fullname": {
+                            "type": "string"
+                          },
+                          "email": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string",
+                            "format": "url"
+                          }
+                        }
+                      }
+                    }
                   }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "description": "Creates a new plant in the store",
-        "requestBody": {
-          "description": "Plant to add to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plant"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -96,32 +87,803 @@
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
+    "/cutlists/{id}": {
+      "get": {
+        "description": "Get a cutlist by id",
+        "operationId": "getCutlistById",
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "description": "ID of plant to delete",
+            "description": "ID of the cutlist to get",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "regex",
+              "pattern": "^[0-9A-Z]{26}$",
+              "description": "Unique identifier",
+              "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
             }
           }
         ],
         "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
+          "200": {
+            "description": "Get a cutlist and all related data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "regex",
+                            "pattern": "^[0-9A-Z]{26}$",
+                            "description": "Unique identifier",
+                            "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                          },
+                          "shortId": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "totalAmountExclVAT": {
+                            "type": "number"
+                          },
+                          "totalAmountInclVAT": {
+                            "type": "number"
+                          },
+                          "vatRate": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "isSubmitted": {
+                            "type": "boolean"
+                          },
+                          "summaryPdfUrl": {
+                            "type": "string",
+                            "format": "url",
+                            "description": "URL to the summary PDF. Present only if cutlist is submitted, null otherwise.",
+                            "nullable": true
+                          },
+                          "materialGroups": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "format": "regex",
+                                  "pattern": "^[0-9A-Z]{26}$",
+                                  "description": "Unique identifier",
+                                  "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                                },
+                                "index": {
+                                  "type": "integer"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "edgeProfileType": {
+                                  "type": "string"
+                                },
+                                "material": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "string",
+                                      "format": "regex",
+                                      "pattern": "^[0-9A-Z]{26}$",
+                                      "description": "Unique identifier",
+                                      "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                                    },
+                                    "articleCode": {
+                                      "type": "string"
+                                    },
+                                    "shortDescription": {
+                                      "type": "string"
+                                    },
+                                    "lengthMM": {
+                                      "type": "integer"
+                                    },
+                                    "widthMM": {
+                                      "type": "integer"
+                                    },
+                                    "thicknessMM": {
+                                      "type": "integer"
+                                    }
+                                  }
+                                },
+                                "parts": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "type": "string",
+                                        "format": "regex",
+                                        "pattern": "^[0-9A-Z]{26}$",
+                                        "description": "Unique identifier",
+                                        "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                                      },
+                                      "index": {
+                                        "type": "integer"
+                                      },
+                                      "quantity": {
+                                        "type": "integer"
+                                      },
+                                      "label": {
+                                        "type": "string"
+                                      },
+                                      "createLabel": {
+                                        "type": "boolean"
+                                      },
+                                      "grainDirection": {
+                                        "enum": [
+                                          "along",
+                                          "none"
+                                        ]
+                                      },
+                                      "lengthMM": {
+                                        "type": "integer"
+                                      },
+                                      "widthMM": {
+                                        "type": "integer"
+                                      },
+                                      "thicknessUM": {
+                                        "type": "integer"
+                                      },
+                                      "partType": {
+                                        "enum": [
+                                          "panel",
+                                          "strip",
+                                          "sheet"
+                                        ]
+                                      },
+                                      "edgeProfile": {
+                                        "type": "object",
+                                        "properties": {
+                                          "length1": {
+                                            "type": "string"
+                                          },
+                                          "length2": {
+                                            "type": "string"
+                                          },
+                                          "width1": {
+                                            "type": "string"
+                                          },
+                                          "width2": {
+                                            "type": "string"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "description": "Present if cutlist submitted, not included otherwise",
+                                  "nullable": true
+                                }
+                              }
+                            }
+                          },
+                          "pricingLineItems": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "description": {
+                                  "type": "string"
+                                },
+                                "category": {
+                                  "type": "string"
+                                },
+                                "categoryName": {
+                                  "type": "string"
+                                },
+                                "quantity": {
+                                  "type": "number"
+                                },
+                                "unit": {
+                                  "type": "string"
+                                },
+                                "unitAmount": {
+                                  "type": "number"
+                                },
+                                "totalAmount": {
+                                  "type": "number"
+                                },
+                                "customPriceApplied": {
+                                  "type": "boolean"
+                                },
+                                "materialId": {
+                                  "type": "string",
+                                  "format": "regex",
+                                  "pattern": "^[0-9A-Z]{26}$",
+                                  "description": "Unique identifier",
+                                  "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                                },
+                                "materialGroupId": {
+                                  "type": "string",
+                                  "format": "regex",
+                                  "pattern": "^[0-9A-Z]{26}$",
+                                  "description": "Unique identifier",
+                                  "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                                },
+                                "code": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           },
-          "400": {
-            "description": "unexpected error",
+          "404": {
+            "description": "Cutlist not found",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "type": "NotFoundError",
+                  "message": "params.id is not a valid ULID",
+                  "statusCode": 404,
+                  "stack": "NotFoundError: params.id is not a valid ULID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cutlists/{id}/submit": {
+      "put": {
+        "description": "Submit a cutlist. This will disable any future operations on the cutlist. After submission, it will include the pdf URL and part data",
+        "operationId": "submitCutlist",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the cutlist to submit",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "regex",
+              "pattern": "^[0-9A-Z]{26}$",
+              "description": "Unique identifier",
+              "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the submitted cutlist data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "regex",
+                            "pattern": "^[0-9A-Z]{26}$",
+                            "description": "Unique identifier",
+                            "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                          },
+                          "shortId": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "totalAmountExclVAT": {
+                            "type": "number"
+                          },
+                          "totalAmountInclVAT": {
+                            "type": "number"
+                          },
+                          "vatRate": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "isSubmitted": {
+                            "type": "boolean"
+                          },
+                          "summaryPdfUrl": {
+                            "type": "string",
+                            "format": "url",
+                            "description": "URL to the summary PDF. Present only if cutlist is submitted, null otherwise.",
+                            "nullable": true
+                          },
+                          "materialGroups": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "format": "regex",
+                                  "pattern": "^[0-9A-Z]{26}$",
+                                  "description": "Unique identifier",
+                                  "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                                },
+                                "index": {
+                                  "type": "integer"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "edgeProfileType": {
+                                  "type": "string"
+                                },
+                                "material": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "string",
+                                      "format": "regex",
+                                      "pattern": "^[0-9A-Z]{26}$",
+                                      "description": "Unique identifier",
+                                      "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                                    },
+                                    "articleCode": {
+                                      "type": "string"
+                                    },
+                                    "shortDescription": {
+                                      "type": "string"
+                                    },
+                                    "lengthMM": {
+                                      "type": "integer"
+                                    },
+                                    "widthMM": {
+                                      "type": "integer"
+                                    },
+                                    "thicknessMM": {
+                                      "type": "integer"
+                                    }
+                                  }
+                                },
+                                "parts": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "type": "string",
+                                        "format": "regex",
+                                        "pattern": "^[0-9A-Z]{26}$",
+                                        "description": "Unique identifier",
+                                        "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                                      },
+                                      "index": {
+                                        "type": "integer"
+                                      },
+                                      "quantity": {
+                                        "type": "integer"
+                                      },
+                                      "label": {
+                                        "type": "string"
+                                      },
+                                      "createLabel": {
+                                        "type": "boolean"
+                                      },
+                                      "grainDirection": {
+                                        "enum": [
+                                          "along",
+                                          "none"
+                                        ]
+                                      },
+                                      "lengthMM": {
+                                        "type": "integer"
+                                      },
+                                      "widthMM": {
+                                        "type": "integer"
+                                      },
+                                      "thicknessUM": {
+                                        "type": "integer"
+                                      },
+                                      "partType": {
+                                        "enum": [
+                                          "panel",
+                                          "strip",
+                                          "sheet"
+                                        ]
+                                      },
+                                      "edgeProfile": {
+                                        "type": "object",
+                                        "properties": {
+                                          "length1": {
+                                            "type": "string"
+                                          },
+                                          "length2": {
+                                            "type": "string"
+                                          },
+                                          "width1": {
+                                            "type": "string"
+                                          },
+                                          "width2": {
+                                            "type": "string"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "description": "Present if cutlist submitted, not included otherwise",
+                                  "nullable": true
+                                }
+                              }
+                            }
+                          },
+                          "pricingLineItems": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "description": {
+                                  "type": "string"
+                                },
+                                "category": {
+                                  "type": "string"
+                                },
+                                "categoryName": {
+                                  "type": "string"
+                                },
+                                "quantity": {
+                                  "type": "number"
+                                },
+                                "unit": {
+                                  "type": "string"
+                                },
+                                "unitAmount": {
+                                  "type": "number"
+                                },
+                                "totalAmount": {
+                                  "type": "number"
+                                },
+                                "customPriceApplied": {
+                                  "type": "boolean"
+                                },
+                                "materialId": {
+                                  "type": "string",
+                                  "format": "regex",
+                                  "pattern": "^[0-9A-Z]{26}$",
+                                  "description": "Unique identifier",
+                                  "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                                },
+                                "materialGroupId": {
+                                  "type": "string",
+                                  "format": "regex",
+                                  "pattern": "^[0-9A-Z]{26}$",
+                                  "description": "Unique identifier",
+                                  "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                                },
+                                "code": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Cutlist not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "type": "NotFoundError",
+                  "message": "params.id is not a valid ULID",
+                  "statusCode": 404,
+                  "stack": "NotFoundError: params.id is not a valid ULID"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cutlists/material-groups/{id}": {
+      "delete": {
+        "description": "Delete a material group.",
+        "operationId": "deleteMaterialGroup",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of the material group to delete",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "regex",
+              "pattern": "^[0-9A-Z]{26}$",
+              "description": "Unique identifier",
+              "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "format": "regex",
+                            "pattern": "^[0-9A-Z]{26}$",
+                            "description": "Unique identifier",
+                            "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                          },
+                          "shortId": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "totalAmountExclVAT": {
+                            "type": "number"
+                          },
+                          "totalAmountInclVAT": {
+                            "type": "number"
+                          },
+                          "vatRate": {
+                            "type": "number",
+                            "minimum": 0,
+                            "maximum": 100
+                          },
+                          "isSubmitted": {
+                            "type": "boolean"
+                          },
+                          "summaryPdfUrl": {
+                            "type": "string",
+                            "format": "url",
+                            "description": "URL to the summary PDF. Present only if cutlist is submitted, null otherwise.",
+                            "nullable": true
+                          },
+                          "materialGroups": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string",
+                                  "format": "regex",
+                                  "pattern": "^[0-9A-Z]{26}$",
+                                  "description": "Unique identifier",
+                                  "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                                },
+                                "index": {
+                                  "type": "integer"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "edgeProfileType": {
+                                  "type": "string"
+                                },
+                                "material": {
+                                  "type": "object",
+                                  "properties": {
+                                    "id": {
+                                      "type": "string",
+                                      "format": "regex",
+                                      "pattern": "^[0-9A-Z]{26}$",
+                                      "description": "Unique identifier",
+                                      "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                                    },
+                                    "articleCode": {
+                                      "type": "string"
+                                    },
+                                    "shortDescription": {
+                                      "type": "string"
+                                    },
+                                    "lengthMM": {
+                                      "type": "integer"
+                                    },
+                                    "widthMM": {
+                                      "type": "integer"
+                                    },
+                                    "thicknessMM": {
+                                      "type": "integer"
+                                    }
+                                  }
+                                },
+                                "parts": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "type": "string",
+                                        "format": "regex",
+                                        "pattern": "^[0-9A-Z]{26}$",
+                                        "description": "Unique identifier",
+                                        "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                                      },
+                                      "index": {
+                                        "type": "integer"
+                                      },
+                                      "quantity": {
+                                        "type": "integer"
+                                      },
+                                      "label": {
+                                        "type": "string"
+                                      },
+                                      "createLabel": {
+                                        "type": "boolean"
+                                      },
+                                      "grainDirection": {
+                                        "enum": [
+                                          "along",
+                                          "none"
+                                        ]
+                                      },
+                                      "lengthMM": {
+                                        "type": "integer"
+                                      },
+                                      "widthMM": {
+                                        "type": "integer"
+                                      },
+                                      "thicknessUM": {
+                                        "type": "integer"
+                                      },
+                                      "partType": {
+                                        "enum": [
+                                          "panel",
+                                          "strip",
+                                          "sheet"
+                                        ]
+                                      },
+                                      "edgeProfile": {
+                                        "type": "object",
+                                        "properties": {
+                                          "length1": {
+                                            "type": "string"
+                                          },
+                                          "length2": {
+                                            "type": "string"
+                                          },
+                                          "width1": {
+                                            "type": "string"
+                                          },
+                                          "width2": {
+                                            "type": "string"
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  "description": "Present if cutlist submitted, not included otherwise",
+                                  "nullable": true
+                                }
+                              }
+                            }
+                          },
+                          "pricingLineItems": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "description": {
+                                  "type": "string"
+                                },
+                                "category": {
+                                  "type": "string"
+                                },
+                                "categoryName": {
+                                  "type": "string"
+                                },
+                                "quantity": {
+                                  "type": "number"
+                                },
+                                "unit": {
+                                  "type": "string"
+                                },
+                                "unitAmount": {
+                                  "type": "number"
+                                },
+                                "totalAmount": {
+                                  "type": "number"
+                                },
+                                "customPriceApplied": {
+                                  "type": "boolean"
+                                },
+                                "materialId": {
+                                  "type": "string",
+                                  "format": "regex",
+                                  "pattern": "^[0-9A-Z]{26}$",
+                                  "description": "Unique identifier",
+                                  "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                                },
+                                "materialGroupId": {
+                                  "type": "string",
+                                  "format": "regex",
+                                  "pattern": "^[0-9A-Z]{26}$",
+                                  "description": "Unique identifier",
+                                  "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                                },
+                                "code": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Material group not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "type": "NotFoundError",
+                  "message": "Not Found",
+                  "statusCode": 404,
+                  "stack": "NotFoundError: Not Found"
                 }
               }
             }
@@ -132,64 +894,551 @@
   },
   "components": {
     "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
+      "id": {
+        "type": "string",
+        "format": "regex",
+        "pattern": "^[0-9A-Z]{26}$",
+        "description": "Unique identifier",
+        "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+      },
+      "Cutlist": {
         "type": "object",
         "properties": {
-          "name": {
-            "description": "The name of the plant",
+          "id": {
+            "type": "string",
+            "format": "regex",
+            "pattern": "^[0-9A-Z]{26}$",
+            "description": "Unique identifier",
+            "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+          },
+          "shortId": {
             "type": "string"
           },
-          "tag": {
-            "description": "Tag to specify the type",
+          "title": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totalAmountExclVAT": {
+            "type": "number"
+          },
+          "totalAmountInclVAT": {
+            "type": "number"
+          },
+          "vatRate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "isSubmitted": {
+            "type": "boolean"
+          },
+          "summaryPdfUrl": {
+            "type": "string",
+            "format": "url",
+            "description": "URL to the summary PDF. Present only if cutlist is submitted, null otherwise.",
+            "nullable": true
+          },
+          "materialGroups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "regex",
+                  "pattern": "^[0-9A-Z]{26}$",
+                  "description": "Unique identifier",
+                  "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                },
+                "index": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "edgeProfileType": {
+                  "type": "string"
+                },
+                "material": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "regex",
+                      "pattern": "^[0-9A-Z]{26}$",
+                      "description": "Unique identifier",
+                      "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                    },
+                    "articleCode": {
+                      "type": "string"
+                    },
+                    "shortDescription": {
+                      "type": "string"
+                    },
+                    "lengthMM": {
+                      "type": "integer"
+                    },
+                    "widthMM": {
+                      "type": "integer"
+                    },
+                    "thicknessMM": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "parts": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "regex",
+                        "pattern": "^[0-9A-Z]{26}$",
+                        "description": "Unique identifier",
+                        "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                      },
+                      "index": {
+                        "type": "integer"
+                      },
+                      "quantity": {
+                        "type": "integer"
+                      },
+                      "label": {
+                        "type": "string"
+                      },
+                      "createLabel": {
+                        "type": "boolean"
+                      },
+                      "grainDirection": {
+                        "enum": [
+                          "along",
+                          "none"
+                        ]
+                      },
+                      "lengthMM": {
+                        "type": "integer"
+                      },
+                      "widthMM": {
+                        "type": "integer"
+                      },
+                      "thicknessUM": {
+                        "type": "integer"
+                      },
+                      "partType": {
+                        "enum": [
+                          "panel",
+                          "strip",
+                          "sheet"
+                        ]
+                      },
+                      "edgeProfile": {
+                        "type": "object",
+                        "properties": {
+                          "length1": {
+                            "type": "string"
+                          },
+                          "length2": {
+                            "type": "string"
+                          },
+                          "width1": {
+                            "type": "string"
+                          },
+                          "width2": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "description": "Present if cutlist submitted, not included otherwise",
+                  "nullable": true
+                }
+              }
+            }
+          },
+          "pricingLineItems": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "description": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string"
+                },
+                "categoryName": {
+                  "type": "string"
+                },
+                "quantity": {
+                  "type": "number"
+                },
+                "unit": {
+                  "type": "string"
+                },
+                "unitAmount": {
+                  "type": "number"
+                },
+                "totalAmount": {
+                  "type": "number"
+                },
+                "customPriceApplied": {
+                  "type": "boolean"
+                },
+                "materialId": {
+                  "type": "string",
+                  "format": "regex",
+                  "pattern": "^[0-9A-Z]{26}$",
+                  "description": "Unique identifier",
+                  "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                },
+                "materialGroupId": {
+                  "type": "string",
+                  "format": "regex",
+                  "pattern": "^[0-9A-Z]{26}$",
+                  "description": "Unique identifier",
+                  "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                },
+                "code": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "CutlistSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "regex",
+            "pattern": "^[0-9A-Z]{26}$",
+            "description": "Unique identifier",
+            "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+          },
+          "name": {
+            "type": "string"
+          },
+          "requestType": {
+            "enum": [
+              "place_order",
+              "request_quote"
+            ]
+          },
+          "createdAt": {
+            "type": "number"
+          },
+          "updatedAt": {
+            "type": "number"
+          },
+          "submittedAt": {
+            "type": "number"
+          },
+          "cancelledAt": {
+            "type": "number"
+          },
+          "fullname": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "url"
+          }
+        }
+      },
+      "Material": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "regex",
+            "pattern": "^[0-9A-Z]{26}$",
+            "description": "Unique identifier",
+            "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+          },
+          "articleCode": {
+            "type": "string"
+          },
+          "shortDescription": {
+            "type": "string"
+          },
+          "lengthMM": {
+            "type": "integer"
+          },
+          "widthMM": {
+            "type": "integer"
+          },
+          "thicknessMM": {
+            "type": "integer"
+          }
+        }
+      },
+      "Part": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "regex",
+            "pattern": "^[0-9A-Z]{26}$",
+            "description": "Unique identifier",
+            "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+          },
+          "index": {
+            "type": "integer"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          },
+          "createLabel": {
+            "type": "boolean"
+          },
+          "grainDirection": {
+            "enum": [
+              "along",
+              "none"
+            ]
+          },
+          "lengthMM": {
+            "type": "integer"
+          },
+          "widthMM": {
+            "type": "integer"
+          },
+          "thicknessUM": {
+            "type": "integer"
+          },
+          "partType": {
+            "enum": [
+              "panel",
+              "strip",
+              "sheet"
+            ]
+          },
+          "edgeProfile": {
+            "type": "object",
+            "properties": {
+              "length1": {
+                "type": "string"
+              },
+              "length2": {
+                "type": "string"
+              },
+              "width1": {
+                "type": "string"
+              },
+              "width2": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "MaterialGroup": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "regex",
+            "pattern": "^[0-9A-Z]{26}$",
+            "description": "Unique identifier",
+            "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+          },
+          "index": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "edgeProfileType": {
+            "type": "string"
+          },
+          "material": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "regex",
+                "pattern": "^[0-9A-Z]{26}$",
+                "description": "Unique identifier",
+                "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+              },
+              "articleCode": {
+                "type": "string"
+              },
+              "shortDescription": {
+                "type": "string"
+              },
+              "lengthMM": {
+                "type": "integer"
+              },
+              "widthMM": {
+                "type": "integer"
+              },
+              "thicknessMM": {
+                "type": "integer"
+              }
+            }
+          },
+          "parts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "regex",
+                  "pattern": "^[0-9A-Z]{26}$",
+                  "description": "Unique identifier",
+                  "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+                },
+                "index": {
+                  "type": "integer"
+                },
+                "quantity": {
+                  "type": "integer"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "createLabel": {
+                  "type": "boolean"
+                },
+                "grainDirection": {
+                  "enum": [
+                    "along",
+                    "none"
+                  ]
+                },
+                "lengthMM": {
+                  "type": "integer"
+                },
+                "widthMM": {
+                  "type": "integer"
+                },
+                "thicknessUM": {
+                  "type": "integer"
+                },
+                "partType": {
+                  "enum": [
+                    "panel",
+                    "strip",
+                    "sheet"
+                  ]
+                },
+                "edgeProfile": {
+                  "type": "object",
+                  "properties": {
+                    "length1": {
+                      "type": "string"
+                    },
+                    "length2": {
+                      "type": "string"
+                    },
+                    "width1": {
+                      "type": "string"
+                    },
+                    "width2": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Present if cutlist submitted, not included otherwise",
+            "nullable": true
+          }
+        }
+      },
+      "PricingLineItem": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unitAmount": {
+            "type": "number"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "customPriceApplied": {
+            "type": "boolean"
+          },
+          "materialId": {
+            "type": "string",
+            "format": "regex",
+            "pattern": "^[0-9A-Z]{26}$",
+            "description": "Unique identifier",
+            "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+          },
+          "materialGroupId": {
+            "type": "string",
+            "format": "regex",
+            "pattern": "^[0-9A-Z]{26}$",
+            "description": "Unique identifier",
+            "example": "01J2ZPSXQ17G6QSSDJE599T0E2"
+          },
+          "code": {
             "type": "string"
           }
         }
       },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
-            }
-          }
-        ]
-      },
       "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
         "type": "object",
         "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
+          "type": {
+            "type": "string"
           },
           "message": {
+            "type": "string"
+          },
+          "statusCode": {
+            "type": "number"
+          },
+          "stack": {
             "type": "string"
           }
         }
       }
     },
     "securitySchemes": {
-      "bearerAuth": {
+      "ApiKeyAuth": {
         "type": "http",
-        "scheme": "bearer"
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
-  }
+  },
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ]
 }
